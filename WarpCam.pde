@@ -4,11 +4,16 @@ class WarpCam {
   boolean[] lockedPoints = new boolean[4];
   int margin, radius;
   XML xml;
+  color col;
+  int stk;
   
   WarpCam() {
   
       margin = 50;
       radius = 30;
+      
+      stk = 2;
+      col = color(#1ED33D);
       
       canonicalPoints = new ArrayList<PVector>();
       
@@ -46,7 +51,7 @@ class WarpCam {
       XML[] children = xml.getChildren("point");
          
       for (int i = 0; i < 4; i++) {
-        canonicalPoints.set(i, new PVector(children[i].getFloat("x"), children[i].getFloat("y")));
+        canonicalPoints.set(children[i].getInt("id"), new PVector(children[i].getFloat("x"), children[i].getFloat("y")));
       }
   }
   
@@ -73,22 +78,37 @@ class WarpCam {
   }
   
   void display() {
-  
-    strokeWeight(1);
-    stroke(255);
+
+    noStroke();
+    strokeWeight(stk);
     
+    fill(0,100);
+    rect(15,5,100,60);
+
+    stroke(col);
+
+    fill(255);
+    textSize(12);
+    text("Predator_v1.0\r\nMedialab Prado\r\nCalibration", 20, 20);
+    noFill();
+    
+    fill(col);
     for (int i = 0; i < 3; i++) {
       
       line(canonicalPoints.get(i).x, canonicalPoints.get(i).y, canonicalPoints.get(i+1).x, canonicalPoints.get(i+1).y);
-      if (lockedPoints[i]) fill(255,100);
+      
+      if (lockedPoints[i]) fill(col,150);
       else noFill();
+      
       ellipse(canonicalPoints.get(i).x, canonicalPoints.get(i).y, 2*radius, 2*radius);
     
     }
     
     line(canonicalPoints.get(3).x, canonicalPoints.get(3).y, canonicalPoints.get(0).x, canonicalPoints.get(0).y);
-    if (lockedPoints[3]) fill(255,100);
+    
+    if (lockedPoints[3]) fill(col,150);
     else noFill();
+    
     ellipse(canonicalPoints.get(3).x, canonicalPoints.get(3).y, 2*radius, 2*radius);
 
     

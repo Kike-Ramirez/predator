@@ -8,24 +8,30 @@ import org.opencv.core.Size;
 import org.opencv.core.Mat;
 import org.opencv.core.CvType;
 
-Capture video;
+// Capture video;
+Movie video;
+
 OpenCV opencv;
 PImage warpedImage;
 WarpCam warpCam;
+Predator predator;
 
 // Status: 0 => Calibration; 1 => Instructions; 2 => Game 
 int status = 0;
 
 void setup() {
   size(640, 480);
-  video = new Capture(this, 640, 480);
+  // video = new Capture(this, 640, 480);
+  video = new Movie(this, "medialabCCTV.mpg");
+  
   opencv = new OpenCV(this, 640, 480);
   
   warpCam = new WarpCam();
+  predator = new Predator();
   
   opencv.startBackgroundSubtraction(5, 3, 0.5);
   
-  video.start();
+  video.loop();
   
   warpedImage = createImage(640, 480, ARGB);  
   
@@ -58,6 +64,9 @@ void draw() {
     opencv.loadImage(warpedImage);
     image(warpedImage, 0, 0);
     
+    //opencv.blur(20);
+    //opencv.threshold(120);
+    
     opencv.updateBackground();
     
     opencv.dilate();
@@ -69,14 +78,23 @@ void draw() {
     for (Contour contour : opencv.findContours()) {
       contour.draw();
     }
+    
+    predator.update();
+    predator.display();
+    
   }
 
   
 }
 
-void captureEvent(Capture c) {
-  c.read();
+//void captureEvent(Capture c) {
+//  c.read();
+//}
+
+void movieEvent(Movie m) {
+  m.read();
 }
+
 
 Mat getPerspectiveTransformation(ArrayList<PVector> inputPoints, int w, int h) {
   Point[] canonicalPoints = new Point[4];
