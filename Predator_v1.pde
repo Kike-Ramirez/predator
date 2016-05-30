@@ -7,6 +7,8 @@ import org.opencv.core.Size;
 
 import org.opencv.core.Mat;
 import org.opencv.core.CvType;
+import java.awt.*;
+
 
 // Capture video;
 Movie video;
@@ -15,6 +17,7 @@ OpenCV opencv;
 PImage warpedImage;
 WarpCam warpCam;
 Predator predator;
+ArrayList<Player> players;
 
 // Status: 0 => Calibration; 1 => Instructions; 2 => Game 
 int status = 0;
@@ -34,6 +37,7 @@ void setup() {
   video.loop();
   
   warpedImage = createImage(640, 480, ARGB);  
+  players = new ArrayList<Player>();
   
 }
 
@@ -75,15 +79,74 @@ void draw() {
     noFill();
     stroke(255, 0, 0);
     strokeWeight(3);
+    
+    ArrayList<PVector> contours = new ArrayList<PVector>();
+    
     for (Contour contour : opencv.findContours()) {
-      contour.draw();
+      Rectangle cuadrado = contour.getBoundingBox();
+      PVector centro = new PVector(cuadrado.x, cuadrado.y);
+      Boolean added = false;
+      
+      for (int i = 0; i < contours.size(); i++) {
+      
+        float dist = pow((centro.x - contours.get(i).x), 2) + pow((centro.y - contours.get(i).y), 2);
+        
+        if (dist < 10000) {
+        
+          // Añadir valor a la lista
+          added = true;
+          float mediaX = 0.5 * (contours.get(i).x + centro.x);
+          float mediaY = 0.5 * (contours.get(i).y + centro.y);
+          contours.set(i, new PVector(mediaX,mediaY));
+          
+        }
+      }
+      
+      if (!added) {
+        contours.add(centro);
+      }
+      
+      //contour.draw();
     }
+    
+    stroke(255);
+    for (int i = 0; i < contours.size(); i++) {
+      
+      Boolean added = false;
+      
+      for (int j = 0; j < players.size(); j++) {
+        
+        if (players.get(j).checkId(contours.get(i))) {
+          
+          added = true;
+          players.get(j).update(contours.get(i));
+          players.get(j).display();
+          //rect(contours.get(i).x,contours.get(i).y,100,100);
+        
+        }
+                
+      }
+      
+      if (!added) players.add(new Player(contours.get(i)));
+      
+    }
+    
+    for (int i = players.size()-1; i >= 0; i--) {
+    
+      players.get(i).tick();
+      predator.eat(players.get(i));
+      if (!players.get(i).isAlive()) players.remove(i);
+    
+    } 
+    
     
     predator.update();
     predator.display();
     
   }
 
+  text(frameRate, 20, 20);
+  text(players.size(), 20, 50);
   
 }
 
@@ -131,6 +194,7 @@ void keyPressed() {
     println("salvado");
     warpCam.saveSettings();
   }
+  else if ((key == 'k') && (players.size() > 0)) players.get(0).dead();
   
 }
 
@@ -155,6 +219,12 @@ void mouseDragged() {
       if (warpCam.lockedPoints[i]) warpCam.update(i);
     
     }
+  }
+  
+  else if (status == 2) {
+  
+    predator.setTarget(new PVector(mouseX, mouseY));
+    
   }
   
 }
