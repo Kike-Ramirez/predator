@@ -2,6 +2,7 @@ class Player {
 
   PVector posicion, objetivo;
   int size;
+  float distancia;
   color col;
   float life;
   boolean alive, visible;
@@ -15,6 +16,8 @@ class Player {
     life = 0;
     alive = true;
     visible = true;
+    distancia = pow((posicion.x - corner.x), 2) + pow((posicion.y - corner.y), 2);
+
   
   }
   
@@ -24,6 +27,7 @@ class Player {
     PVector delta = obj.copy().sub(posicion);
     delta.mult(0.4);
     posicion.add(delta);
+    distancia = pow((posicion.x - corner.x), 2) + pow((posicion.y - corner.y), 2);
     life = 0;
   
   }
@@ -57,7 +61,7 @@ class Player {
   
     float dist = pow((posicion.x - punto.x), 2) + pow((posicion.y - punto.y), 2);
     
-    if (dist < 10000) return true;
+    if (dist < pow(dispersion,2)) return true;
     else return false;
   
   }
@@ -65,7 +69,7 @@ class Player {
   void display() {
     
     if (visible) {
-      rectMode(CENTER);
+      rectMode(CORNER);
       stroke(col);
       strokeWeight(2);
       noFill();
@@ -73,6 +77,19 @@ class Player {
       translate(posicion.x, posicion.y);
       rect(0, 0, size, size);
       popMatrix();
+      
+      int posfachadaX = int(map(posicion.x, 0 , 640, 0, fachada.width));
+      int posfachadaY = int(map(posicion.y, 0 , 480, 0, fachada.height));
+      int sizefachada = int(map(size, 0 , 640, 0, fachada.width));
+      
+      fachada.pushMatrix();
+      fachada.beginDraw();
+      fachada.stroke(255);
+      fachada.translate(posfachadaX, posfachadaY);
+      fachada.rect(0,0, sizefachada, sizefachada);
+      fachada.endDraw();
+      fachada.popMatrix();
+      
     }
   
   }

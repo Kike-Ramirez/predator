@@ -36,15 +36,14 @@ class WarpCam {
   
   float getDistance(int i) {
     
-    return sqrt(pow((mouseX - canonicalPoints.get(i).x),2) + pow((mouseY - canonicalPoints.get(i).y),2));
+    return sqrt(pow((mouseX - 260 - canonicalPoints.get(i).x),2) + pow((mouseY - 40 - canonicalPoints.get(i).y),2));
   
   }
   
   void update(int i) {
   
-    canonicalPoints.get(i).x = mouseX;
-    canonicalPoints.get(i).y = mouseY;
-  
+    canonicalPoints.get(i).x = mouseX-260;
+    canonicalPoints.get(i).y = mouseY-40;
   }
 
   void loadSettings() {
